@@ -18,7 +18,8 @@ app.use(express.json());
 dbConnection();
 
 // Rutas
-app.use('/api/users', require('./routes/user'));
+app.use('/api/users', require('./routes/user.router'));
+app.use('/api/login', require('./routes/login.router'));
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`);
