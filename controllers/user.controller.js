@@ -5,13 +5,35 @@ const User = require('../models/user.model');
 const { generateJWT } = require('../helpers/jwt');
 
 const getUsers = async (req, res = response) => {
-    const users = await User.find({}, 'name email role google img');
 
-    res.json({
-        ok: true,
-        users,
-        uid: req.uid
-    });
+    try {
+
+        const start = Number(req.query.start) || 0;
+        const limit = Number(req.query.limit) || 5;
+
+        const [users, total] = await Promise.all([
+            User.find({}, 'name email role google img')
+                .skip(start)
+                .limit(limit),
+            User.countDocuments()
+        ]);
+
+
+        res.json({
+            ok: true,
+            users,
+            uid: req.uid,
+            total
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al obtener los usuarios',
+        })
+    }
+
 }
 
 const saveUser = async (req, res = response) => {
@@ -107,7 +129,7 @@ const deleteUser = async (req, res = response) => {
         const uid = req.params.id;
         const userDB = await User.findById(uid);
         if (!userDB) {
-           return res.status(404).json({
+            return res.status(404).json({
                 ok: false,
                 msg: 'No se encontro ningun usuario con ese id'
             })

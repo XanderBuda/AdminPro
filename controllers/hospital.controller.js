@@ -2,12 +2,26 @@ const { response } = require('express');
 
 const Hospital = require('../models/hospital.model');
 
-const getHospitals = (req, res = response) => {
+const getHospitals = async (req, res = response) => {
 
-    res.json({
-        ok: true,
-        msg: 'getHospitals'
-    });
+    try {
+
+        const hospitals = await Hospital.find()
+                                        .populate('user', 'name email');
+
+        res.json({
+            ok: true,
+            hospitals
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al obtener los hospitales',
+        })
+    }
+
 
 }
 
@@ -20,6 +34,14 @@ const saveHospital = async (req, res = response) => {
     });
 
     try {
+        const hospitalDB = await Hospital.findOne({ name: hospital.name });
+
+        if (hospitalDB) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Ya existe un hospital con ese nombre'
+            });
+        }
 
         await hospital.save();
 

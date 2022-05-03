@@ -1,21 +1,55 @@
 const { response } = require('express');
 
-const getDoctors = (req, res = response) => {
+const Doctor = require('../models/doctor.model')
 
-    res.json({
-        ok: true,
-        msg: 'getDoctors'
-    });
+const getDoctors = async (req, res = response) => {
+
+    try {
+
+        const doctors = await Doctor.find()
+                                    .populate('user', 'name email')
+                                    .populate('hospital', 'name');
+
+        res.json({
+            ok: true,
+            doctors
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al obtener los medicos',
+        })
+    }
+
     
+
 }
 
-const saveDoctor = (req, res = response) => {
+const saveDoctor = async (req, res = response) => {
 
-    res.json({
-        ok: true,
-        msg: 'saveDoctor'
+    const doctor = new Doctor({
+        user: req.uid,
+        ...req.body
     });
-    
+
+    try {
+        const doctorDB = await doctor.save();
+
+        res.json({
+            ok: true,
+            doctor: doctorDB,
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al guardar el doctor',
+        })
+    }
+
 }
 
 const updateDoctor = (req, res = response) => {
@@ -24,7 +58,7 @@ const updateDoctor = (req, res = response) => {
         ok: true,
         msg: 'updateDoctor'
     });
-    
+
 }
 
 const deleteDoctor = (req, res = response) => {
@@ -33,7 +67,7 @@ const deleteDoctor = (req, res = response) => {
         ok: true,
         msg: 'deleteDoctor'
     });
-    
+
 }
 
 module.exports = {
