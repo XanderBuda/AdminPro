@@ -7,7 +7,7 @@ const getHospitals = async (req, res = response) => {
     try {
 
         const hospitals = await Hospital.find()
-                                        .populate('user', 'name email');
+            .populate('user', 'name email');
 
         res.json({
             ok: true,
@@ -63,21 +63,77 @@ const saveHospital = async (req, res = response) => {
 
 }
 
-const updateHospital = (req, res = response) => {
+const updateHospital = async (req, res = response) => {
 
-    res.json({
-        ok: true,
-        msg: 'updateHospital'
-    });
+    try {
+        const id = req.params.id;
+        const uid = req.uid;
+
+        const hospital = await Hospital.findById(id);
+
+        if (!hospital) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'Hospital no encontrado por el ID',
+            });
+        }
+
+        const hospitalUpdate = {
+            ...req.body,
+            user: uid
+        };
+
+        const hospitalUpdated = await Hospital.findByIdAndUpdate(id, hospitalUpdate, { new: true });
+
+        res.json({
+            ok: true,
+            hospital: hospitalUpdated
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error inesperado...',
+        })
+
+    }
+
 
 }
 
-const deleteHospital = (req, res = response) => {
+const deleteHospital = async (req, res = response) => {
+    try {
+        const id = req.params.id;
 
-    res.json({
-        ok: true,
-        msg: 'deleteHospital'
-    });
+        const hospital = await Hospital.findById(id);
+
+        if (!hospital) {
+            return res.status(404).json({
+                ok: false,
+                msg: 'Hospital no encontrado por el ID',
+            });
+        }
+
+       await Hospital.findByIdAndDelete(id);
+
+
+        res.json({
+            ok: true,
+            msg: 'Hospital eliminado'
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Error inesperado...',
+        })
+
+    }
+
+
+
 
 }
 

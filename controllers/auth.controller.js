@@ -48,7 +48,34 @@ const login = async (req, res = response) => {
 
 }
 
+const renewToken = async (req, res = response) => {
+
+    try {
+        const uid = req.uid;
+
+        const token = await generateJWT(uid);
+
+        res.json({
+            ok: true,
+            msg: 'Token renovado',
+            token
+        })
+
+    } catch (err) {
+
+        return res.status(401).json({
+            ok: false,
+            msg: 'Token no valido',
+        })
+
+    }
+
+
+
+}
+
 
 module.exports = {
-    login
+    login,
+    renewToken
 };
