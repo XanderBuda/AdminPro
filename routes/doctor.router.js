@@ -27,11 +27,20 @@ router.post(
 );
 
 router.put('/:id',
+    [
+        jwtValidation,
+        check('name', 'El nombre es obligatorio').not().isEmpty(),
+        check('hospital', 'El hospital debe ser un id').isMongoId(),
+        fieldValidation
+    ],
     updateDoctor
 
 );
 
 router.delete('/:id',
+    [
+        jwtValidation,
+    ],
     deleteDoctor
 );
 
